@@ -42,7 +42,8 @@ endInput.value = toDateInputValue(defaultEnd);
 
 // Rate: default to the current flat rate; if Cole has changed it before,
 // use the remembered value instead. Not "history" — just a preference.
-rateInput.value = localStorage.getItem(RATE_STORAGE_KEY) ?? DEFAULT_RATE_CENTS_PER_KWH;
+rateInput.value =
+  localStorage.getItem(RATE_STORAGE_KEY) ?? DEFAULT_RATE_CENTS_PER_KWH;
 
 // --- clipboard ---
 new ClipboardJS("#copy-btn", { text: () => summaryText.textContent ?? "" }).on(
@@ -80,7 +81,6 @@ form.addEventListener("submit", async (event) => {
     summaryText.textContent = formatSummary({
       breakdown,
       periodDate: end,
-      others: OTHERS,
     });
     show(breakdownSection);
     show(summarySection);

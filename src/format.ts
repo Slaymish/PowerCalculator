@@ -5,8 +5,6 @@ export interface SummaryInputs {
   breakdown: Breakdown;
   /** Any date inside the billing period — used to derive the month label. */
   periodDate: Date;
-  /** Names to list in the "Everyone" line (non-Hamish flatmates). */
-  others: string[];
 }
 
 /**
@@ -16,15 +14,17 @@ export interface SummaryInputs {
  *   Everyone (Cole, Will, Brontë, Kita): $X each
  *   Hamish: $Y
  */
-export function formatSummary({ breakdown, periodDate, others }: SummaryInputs): string {
+export function formatSummary({
+  breakdown,
+  periodDate,
+}: SummaryInputs): string {
   const month = format(periodDate, "MMMM");
-  const names = others.join(", ");
   const each = money(breakdown.equalShare);
   const hamish = money(breakdown.hamishShare);
 
   return [
     `Power bill — ${month}`,
-    `Everyone (${names}): ${each} each`,
+    `Everyone (excluding Hamish): ${each} each`,
     `Hamish: ${hamish}`,
   ].join("\n");
 }
