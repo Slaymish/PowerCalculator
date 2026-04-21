@@ -1,3 +1,4 @@
+import { addDays, differenceInCalendarDays } from "date-fns";
 import ClipboardJS from "clipboard";
 import { calculateSplit } from "./calc";
 import { formatSummary } from "./format";
@@ -9,9 +10,15 @@ const OTHERS = ["Cole", "Will", "Brontë", "Kita"];
 const FLATMATE_COUNT = OTHERS.length + 1; // +1 for Hamish
 
 const RATE_STORAGE_KEY = "power-calculator.rate";
-const PERIOD_END_STORAGE_KEY = "power-calculator.period-end";
 const DEFAULT_RATE_CENTS_PER_KWH = "34.61";
-const PERIOD_DAYS = 28;
+
+// Billing cycles are 28 days and anchored to a known period end.
+// From this anchor, every other cycle boundary is N×28 days away. Update
+// if the retailer ever shifts the cycle.
+//
+// Reference: bill received 20–21 April 2026 covered 20 Mar → 17 Apr.
+const CYCLE_ANCHOR = new Date(2026, 3, 17); // 17 April 2026 (local time)
+const CYCLE_DAYS = 28;
 
 const form = byId<HTMLFormElement>("bill-form");
 const startInput = form.elements.namedItem("start") as HTMLInputElement;
@@ -27,13 +34,9 @@ const errorText = byId<HTMLParagraphElement>("error-text");
 const copyStatus = byId<HTMLSpanElement>("copy-status");
 
 // --- defaults ---
-// Billing period: 28-day cycle. We remember where the last period ended
-// and default the next one to start there — so month-to-month the dates
-// just pre-fill correctly. On first run we fall back to the 28 days
-// ending today; Cole tweaks to match his bill.
-const priorEnd = readStoredDate(PERIOD_END_STORAGE_KEY);
-const defaultStart = priorEnd ?? addDays(new Date(), -PERIOD_DAYS);
-const defaultEnd = addDays(defaultStart, PERIOD_DAYS);
+// Show the most recently completed 28-day cycle. Stable within a cycle:
+// on 21 Apr, 25 Apr, and 15 May-1 it all shows 20 Mar → 17 Apr.
+const { start: defaultStart, end: defaultEnd } = currentPeriod(new Date());
 startInput.value = toDateInputValue(defaultStart);
 endInput.value = toDateInputValue(defaultEnd);
 
@@ -70,9 +73,8 @@ form.addEventListener("submit", async (event) => {
       flatmateCount: FLATMATE_COUNT,
     });
 
-    // Persist the rate and period end so next month's defaults are right.
+    // Persist the rate so Cole doesn't retype it next time.
     localStorage.setItem(RATE_STORAGE_KEY, String(rate));
-    localStorage.setItem(PERIOD_END_STORAGE_KEY, toDateInputValue(end));
 
     renderBreakdown(breakdown);
     summaryText.textContent = formatSummary({
@@ -113,10 +115,18 @@ function money(n: number): string {
   return `$${n.toFixed(2)}`;
 }
 
-function addDays(d: Date, n: number): Date {
-  const copy = new Date(d);
-  copy.setDate(copy.getDate() + n);
-  return copy;
+/**
+ * The most recently completed 28-day cycle relative to `today`.
+ *
+ * Computed deterministically from CYCLE_ANCHOR — visiting on any day
+ * inside the same cycle returns the same start/end.
+ */
+function currentPeriod(today: Date): { start: Date; end: Date } {
+  const daysSinceAnchor = differenceInCalendarDays(today, CYCLE_ANCHOR);
+  const cycles = Math.floor(daysSinceAnchor / CYCLE_DAYS);
+  const end = addDays(CYCLE_ANCHOR, cycles * CYCLE_DAYS);
+  const start = addDays(end, -CYCLE_DAYS);
+  return { start, end };
 }
 
 function toDateInputValue(d: Date): string {
@@ -124,19 +134,6 @@ function toDateInputValue(d: Date): string {
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
-}
-
-/** Parse a "YYYY-MM-DD" string (date-input format) as a local-time Date. */
-function parseDateInput(s: string): Date {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function readStoredDate(key: string): Date | null {
-  const raw = localStorage.getItem(key);
-  if (!raw) return null;
-  const d = parseDateInput(raw);
-  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 function show(el: HTMLElement): void {
