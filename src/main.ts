@@ -35,7 +35,7 @@ const copyStatus = byId<HTMLSpanElement>("copy-status");
 
 // --- defaults ---
 // Show the most recently completed 28-day cycle. Stable within a cycle:
-// on 21 Apr, 25 Apr, and 15 May-1 it all shows 20 Mar → 17 Apr.
+// on 21 Apr, 25 Apr, and 14 May it all shows 20 Mar → 17 Apr.
 const { start: defaultStart, end: defaultEnd } = currentPeriod(new Date());
 startInput.value = toDateInputValue(defaultStart);
 endInput.value = toDateInputValue(defaultEnd);
@@ -62,10 +62,13 @@ form.addEventListener("submit", async (event) => {
   const data = new FormData(form);
   const total = Number(data.get("total"));
   const rate = Number(data.get("rate"));
-  const start = new Date(String(data.get("start")));
-  const end = new Date(String(data.get("end")));
+  const start = parseDateInput(String(data.get("start")));
+  const end = parseDateInput(String(data.get("end")));
 
   try {
+    if (end <= start) {
+      throw new Error("Billing period end must be after the start date");
+    }
     const serverKwh = await fetchServerKwh({ start, end });
     const breakdown = calculateSplit({
       totalBill: total,
@@ -134,6 +137,17 @@ function toDateInputValue(d: Date): string {
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
+}
+
+/**
+ * Parse a "YYYY-MM-DD" date-input value as local midnight.
+ *
+ * `new Date("2026-03-20")` would parse as UTC — off by up to 13 hours in
+ * NZ. We want Cole's local-time dates to match what's on his bill.
+ */
+function parseDateInput(s: string): Date {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
 }
 
 function show(el: HTMLElement): void {
