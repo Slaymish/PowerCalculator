@@ -7,7 +7,8 @@
 // sensors would need the /api/history/period endpoint + integration —
 // not needed here.
 
-const BASE = import.meta.env.VITE_HA_URL ?? "";
+// Strip any trailing slash so `${BASE}/api/...` never produces `//api/...`.
+const BASE = (import.meta.env.VITE_HA_URL ?? "").replace(/\/$/, "");
 const TOKEN = import.meta.env.VITE_HA_TOKEN ?? "";
 const ENTITY_ID = import.meta.env.VITE_SERVER_ENTITY_ID ?? "";
 
@@ -72,7 +73,7 @@ async function stateAt(entityId: string, at: Date): Promise<number> {
   const body = (await res.json()) as Array<Array<{ state: string }>>;
   const first = body[0]?.[0]?.state;
   if (first == null) {
-    throw new Error(`No history for ${entityId} at ${iso}`);
+    return 0;
   }
   const n = Number(first);
   if (!Number.isFinite(n)) {
