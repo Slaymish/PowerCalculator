@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+/* Hand-written styles on top of Tailwind. Keep these deliberately custom
+   so the app doesn't read as a generated utility-class template. */
+
+:root {
+  --bg: #f6f1e7;
+  --ink: #1b1a17;
+  --rule: #1b1a17;
+  --accent: #a0421f;
+  --muted: #6b6558;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+}
+
+#app {
+  max-width: 560px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+header {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* --- form --- */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+label.total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+label.total > span {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.total-input {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.total-input .dollar {
+  font-size: 2rem;
+  color: var(--muted);
+}
+
+.total-input input {
+  font: inherit;
+  font-size: 2rem;
+  border: none;
+  background: transparent;
+  padding: 0.25rem 0;
+  flex: 1;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.total-input input:focus {
+  outline: none;
+}
+
+.total-input:focus-within {
+  border-bottom-color: var(--accent);
+}
+
+button {
+  align-self: flex-start;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent);
+}
+
+/* --- inline settings line (period, rate) --- */
+
+.settings {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.settings input {
+  font: inherit;
+  font-style: normal;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px dotted var(--muted);
+  padding: 0 0.1rem;
+}
+
+.settings input[type="date"] {
+  width: 13ch;
+}
+
+.settings input[type="number"] {
+  width: 8ch;
+  text-align: right;
+}
+
+.settings input:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+  border-bottom-style: solid;
+}
+
+/* --- output --- */
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 2rem 0 0.5rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.25rem;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 1.5rem;
+}
+
+dt {
+  color: var(--muted);
+}
+
+dd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+pre {
+  background: #fff;
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+#copy-btn {
+  margin-top: 0.75rem;
+}
+
+#copy-status {
+  margin-left: 0.75rem;
+  color: var(--accent);
+  font-style: italic;
+}
+
+#error {
+  margin-top: 1.5rem;
+  color: var(--accent);
+}

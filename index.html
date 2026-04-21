@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Power Calculator</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main id="app">
+      <header>
+        <h1>Power Calculator</h1>
+        <p class="subtitle">Split the flat's power bill.</p>
+      </header>
+
+      <form id="bill-form">
+        <label class="total">
+          <span>Total bill</span>
+          <div class="total-input">
+            <span class="dollar">$</span>
+            <input
+              type="number"
+              step="0.01"
+              name="total"
+              required
+              autofocus
+              inputmode="decimal"
+            />
+          </div>
+        </label>
+
+        <button type="submit">Calculate</button>
+
+        <p class="settings">
+          From
+          <input type="date" name="start" required />
+          to
+          <input type="date" name="end" required />
+          &middot; Rate
+          <input
+            type="number"
+            name="rate"
+            step="0.01"
+            required
+            inputmode="decimal"
+          />
+          c/kWh
+        </p>
+      </form>
+
+      <section id="breakdown" hidden>
+        <h2>Breakdown</h2>
+        <dl id="breakdown-list"></dl>
+      </section>
+
+      <section id="summary" hidden>
+        <h2>Summary</h2>
+        <pre id="summary-text"></pre>
+        <button id="copy-btn" type="button">Copy</button>
+        <span id="copy-status" aria-live="polite"></span>
+      </section>
+
+      <section id="error" hidden>
+        <p id="error-text"></p>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
